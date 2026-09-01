@@ -1,15 +1,15 @@
 # TODOs
 
-## v0.0.1 — Functional editor
+## v0.1.0 — Functional editor
 
 Goal: reliably open, edit, and save text files. Comfortable for quick edits to config files, Markdown, scripts, and source files.
 
 ### Core terminal
 
-- [ ] Terminal raw mode
-- [ ] Keyboard event handling
+- [x] Terminal raw mode
+- [x] Keyboard event handling
 - [ ] Screen rendering
-- [ ] Restore terminal on exit
+- [x] Restore terminal on exit
 
 ### Modes
 
@@ -46,5 +46,34 @@ Goal: reliably open, edit, and save text files. Comfortable for quick edits to c
 
 ### Exit
 
-- [ ] Quit (`Ctrl+Q` or equivalent)
-- [ ] Clean shutdown
+- [x] Quit (`Ctrl+Q` or equivalent)
+- [x] Clean shutdown
+
+## v0.2.0 — Daily driver
+
+Goal: pleasant enough to use as the default terminal editor. Planned stopping point.
+
+### Editing
+
+- [ ] Syntax highlighting
+- [ ] Find and replace
+- [ ] Auto-indent
+- [ ] Bracket matching
+- [ ] Proper Unicode handling
+
+### Files and buffers
+
+- [ ] Multiple files / buffers
+- [ ] Fuzzy file opening
+- [ ] Crash-safe file writes
+- [ ] Reasonable large-file performance
+
+### Config
+
+- [ ] Config file
+- [ ] Configurable keybindings
+
+### Polish
+
+- [ ] System clipboard integration
+- [ ] Polished terminal UI

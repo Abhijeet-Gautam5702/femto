@@ -1,6 +1,6 @@
 # 🪶 femto
 
-![Version](https://img.shields.io/badge/Version-0.0.1-blue.svg)
+![Version](https://img.shields.io/badge/Version-0.1.0-blue.svg)
 ![Status](https://img.shields.io/badge/Status-ACTIVE%20DEVELOPMENT-Green.svg)
 
 A small terminal text editor in Rust. Batteries included: familiar shortcuts, the usual editing tools, and little else. Built to open a file, change it, and get on with your day.
@@ -30,11 +30,15 @@ I wanted a terminal editor that works the way I expect:
 
 Installation steps will be added once the project is in a running state.
 
+## Current development status
+
+Raw terminal mode, keyboard input, `Ctrl+Q`, and RAII-based terminal restoration are implemented. See [Current state](docs/current_state.md).
+
 ## Roadmap
 
 Two phases:
 
-1. **v0.0.1**: Open, edit, and save files. Cursor, selection, copy/cut/paste, undo, search, and a warning if you quit with unsaved changes.
+1. **v0.1.0**: Open, edit, and save files. Cursor, selection, copy/cut/paste, undo, search, and a warning if you quit with unsaved changes.
 2. **Later**: Syntax colors, find and replace, more than one file at a time, a config file, and enough polish to use it every day.
 
 See [TODO.md](TODO.md) for the full list.
