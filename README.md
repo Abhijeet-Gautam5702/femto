@@ -30,6 +30,16 @@ I wanted a terminal editor that works the way I expect:
 
 Installation steps will be added once the project is in a running state.
 
+## Development
+
+Enable the repository's pre-commit checks after cloning:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+Every commit then runs formatting validation, `cargo check`, and all tests.
+
 ## Current development status
 
 Raw terminal mode, keyboard input, `Ctrl+Q`, and RAII-based terminal restoration are implemented. See [Current state](docs/current_state.md).
