@@ -42,7 +42,7 @@ Every commit then runs formatting validation, `cargo check`, and all tests.
 
 ## Current development status
 
-Raw mode, alternate-screen lifecycle management, basic in-memory text redraw, keyboard input, `Ctrl+Q`, and RAII-based terminal restoration are implemented. See [Current state](docs/current_state.md).
+Raw mode, alternate-screen lifecycle management, basic in-memory character insertion and full-document redraw, keyboard input, `Ctrl+Q` / `Esc` exit, and RAII-based terminal restoration are implemented. See [Current state](docs/current_state.md).
 
 ## Roadmap
 

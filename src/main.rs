@@ -1,4 +1,4 @@
-use std::io::{Error, Write, stdout};
+use std::io::{Error, stdout};
 
 use crossterm::{
     cursor,
@@ -15,7 +15,12 @@ struct TerminalGuard;
 impl TerminalGuard {
     fn new() -> ReturnType<Self> {
         terminal::enable_raw_mode()?;
-        match execute!(stdout(), EnterAlternateScreen) {
+        match execute!(
+            stdout(),
+            EnterAlternateScreen,
+            cursor::MoveToColumn(0),
+            cursor::MoveToRow(0)
+        ) {
             Ok(_) => {
                 return Ok(Self);
             }
@@ -34,6 +39,12 @@ impl Drop for TerminalGuard {
     }
 }
 
+/// Cursor Position Coordinates
+struct CursorPos {
+    line: usize,
+    byte_offset: usize,
+}
+
 fn main() -> ReturnType<()> {
     match run() {
         Ok(_) => {}
@@ -48,7 +59,11 @@ fn run() -> ReturnType<()> {
     // A bare `_` would drop the guard immediately; this binding keeps it alive until `run` exits.
     let _terminal_guard = TerminalGuard::new()?;
 
-    let mut terminal_buffer = String::from("");
+    let mut doc_lines: Vec<String> = vec![String::from("")];
+    let mut cursor = CursorPos {
+        line: 0,
+        byte_offset: 0,
+    };
 
     loop {
         let event = event::read()?;
@@ -61,18 +76,33 @@ fn run() -> ReturnType<()> {
                 return Ok(());
             }
             Event::Key(KeyEvent {
+                code: KeyCode::Esc, ..
+            }) => {
+                return Ok(());
+            }
+            Event::Key(KeyEvent {
                 code: KeyCode::Char(ch),
                 ..
             }) => {
-                terminal_buffer.push(ch);
-                redraw(&terminal_buffer)?;
+                let byte_len = ch.len_utf8();
+                doc_lines[cursor.line].insert(cursor.byte_offset, ch);
+                cursor.byte_offset += byte_len;
+                redraw(&doc_lines, &cursor)?;
             }
             Event::Key(KeyEvent {
                 code: KeyCode::Enter,
                 ..
             }) => {
-                terminal_buffer.push('\r');
+                let trail = doc_lines[cursor.line].split_off(cursor.byte_offset);
+                cursor.line += 1;
+                cursor.byte_offset = 0;
+                doc_lines.insert(cursor.line, trail);
+                redraw(&doc_lines, &cursor)?;
             }
+            Event::Key(KeyEvent {
+                code: KeyCode::Left | KeyCode::Right,
+                ..
+            }) => {}
             _ => {
                 execute!(
                     &mut stdout(),
@@ -85,16 +115,27 @@ fn run() -> ReturnType<()> {
     }
 }
 
-fn redraw(text: &str) -> ReturnType<()> {
-    let mut stdout = stdout();
-    write!(&mut stdout, "")?;
+/// Renders every document line to the alternate screen.
+/// Clears the display and restores the terminal cursor to the logical cursor position.
+fn redraw(doc_lines: &[String], cursor_pos: &CursorPos) -> ReturnType<()> {
+    let mut output = stdout();
     execute!(
-        stdout,
-        cursor::MoveToRow(0),
-        cursor::MoveToColumn(0),
-        Print(text)
+        &mut output,
+        terminal::Clear(terminal::ClearType::All),
+        cursor::MoveTo(0, 0)
     )?;
-    // write!(&mut stdout, "{}", text)?;
-    // stdout.flush()?;
+
+    for (line_number, line) in doc_lines.iter().enumerate() {
+        execute!(
+            &mut output,
+            cursor::MoveTo(0, line_number as u16),
+            Print(line)
+        )?;
+    }
+
+    execute!(
+        &mut output,
+        cursor::MoveTo(cursor_pos.byte_offset as u16, cursor_pos.line as u16)
+    )?;
     Ok(())
 }

@@ -8,7 +8,7 @@ Goal: reliably open, edit, and save text files. Comfortable for quick edits to c
 
 - [x] Terminal raw mode
 - [x] Keyboard event handling
-- [ ] Screen rendering
+- [x] Screen rendering
 - [x] Restore terminal on exit
 
 ### Modes
