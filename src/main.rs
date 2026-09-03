@@ -1,11 +1,11 @@
-use std::io::{Error, stdout};
+use std::io::{Error, Write, stdout};
 
 use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent, KeyModifiers},
     execute,
     style::Print,
-    terminal,
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
 
 type ReturnType<T> = Result<T, Error>;
@@ -13,14 +13,23 @@ type ReturnType<T> = Result<T, Error>;
 /// RAII Guard
 struct TerminalGuard;
 impl TerminalGuard {
-    fn enter_raw_mode() -> ReturnType<Self> {
+    fn new() -> ReturnType<Self> {
         terminal::enable_raw_mode()?;
-        Ok(Self)
+        match execute!(stdout(), EnterAlternateScreen) {
+            Ok(_) => {
+                return Ok(Self);
+            }
+            Err(e) => {
+                let _ = terminal::disable_raw_mode();
+                return Err(e);
+            }
+        }
     }
 }
 impl Drop for TerminalGuard {
     /// Performs best-effort cleanup because `Drop` cannot return an error.
     fn drop(&mut self) {
+        let _ = execute!(stdout(), LeaveAlternateScreen);
         let _ = terminal::disable_raw_mode();
     }
 }
@@ -37,7 +46,9 @@ fn main() -> ReturnType<()> {
 
 fn run() -> ReturnType<()> {
     // A bare `_` would drop the guard immediately; this binding keeps it alive until `run` exits.
-    let _terminal_guard = TerminalGuard::enter_raw_mode()?;
+    let _terminal_guard = TerminalGuard::new()?;
+
+    let mut terminal_buffer = String::from("");
 
     loop {
         let event = event::read()?;
@@ -49,6 +60,19 @@ fn run() -> ReturnType<()> {
             }) => {
                 return Ok(());
             }
+            Event::Key(KeyEvent {
+                code: KeyCode::Char(ch),
+                ..
+            }) => {
+                terminal_buffer.push(ch);
+                redraw(&terminal_buffer)?;
+            }
+            Event::Key(KeyEvent {
+                code: KeyCode::Enter,
+                ..
+            }) => {
+                terminal_buffer.push('\r');
+            }
             _ => {
                 execute!(
                     &mut stdout(),
@@ -59,4 +83,18 @@ fn run() -> ReturnType<()> {
             }
         }
     }
+}
+
+fn redraw(text: &str) -> ReturnType<()> {
+    let mut stdout = stdout();
+    write!(&mut stdout, "")?;
+    execute!(
+        stdout,
+        cursor::MoveToRow(0),
+        cursor::MoveToColumn(0),
+        Print(text)
+    )?;
+    // write!(&mut stdout, "{}", text)?;
+    // stdout.flush()?;
+    Ok(())
 }
